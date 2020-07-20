@@ -1,0 +1,139 @@
+---
+title: "Masters Homework 2"
+author: "Fred LaPolla"
+date: "6/11/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+
+## On Your Own Work
+
+>- When you read in a .csv file into R, what class is the object that you read in (like nyc)?
+
+#### it is a data.frame
+
+>- What command can you use to determine what type of data is in a column?
+
+```{r}
+sapply(nyc, class) #shows the type for each column in a dataframe 
+
+class(nyc$CHOLRAT) #shows only the class of the specified column if you know the name
+```
+
+
+>- Provide a command to find the type of data in the DX_DBTS column of nyc. 
+
+```{r}
+class(nyc$DX_DBTS)
+```
+
+
+>- Provide the same command to find the type of data but use the other way of indexing from what you did above. 
+
+```{r}
+sapply(nyc[10], class)
+```
+
+
+
+>- What would happen if we had chosen the first 4 columns of NYC HANES and made a matrix? What would the class of the cells in this matrix be? Why?
+
+
+#### In a matrix all data.types must be the same, so converting the first four columns into a matrix would make the class of all the cells 'characters' and any column that is different would become "N.A"
+
+
+
+>- If we make a vector,vec<- c(3,9,4,7,8,9), and multiply it by WannaMatrix, what is the value in the third row, third column? 
+
+```{r}
+WannaMatrix <- nyc[5:10, 6:9]
+WannaMatrix <- as.matrix(WannaMatrix,nrow = 6, ncol = 4)
+
+vec<- c(3,9,4,7,8,9)
+
+value <- vec*WannaMatrix
+print(value[3,3])
+
+```
+
+
+
+>- What happens if instead we made a vector vec2 <- c(3,9,4,7,8) and multiply it by WannaMatrix, what is the third row, third column value? What is going on? 
+
+```{r}
+vec2 <- c(3,9,4,7,8)
+
+value2 <- vec2*WannaMatrix
+```
+#### This multiplication doesn't work because vec2 has only 5 variables but WannaMatrix has 6 rows. Mutliplying vec with the Matrix multiplies each row with the corresponding integer in the vector, since the new vector isn't a multiple of 6 it cannot be used with the matrix. 
+
+>- Look up the arguments for read.csv
+
+```{r}
+?read.csv
+```
+
+
+>- Use apply() to find the median value of CADMIUM, LEAD CHOLESTEROLTOTAL, GLUCOSESI, CREATININESI, and CREATININE
+
+```{r}
+apply(nyc[,12:19],2, median, na.rm = TRUE)
+```
+
+
+>- Do the same using sapply()
+
+```{r}
+sapply(nyc[,12:19], median, na.rm = TRUE)
+```
+
+
+>- Use a for loop to find the median value of columns 16:19
+
+```{r}
+for (i in 16:19){
+  med_val <- median(nyc[,i], na.rm = TRUE)
+  print(c(colnames(nyc[i]), med_val))
+}
+```
+
+
+>- Make a for loop to find the standard deviation (hint sd() ) of CHOLESTEROLTOTAL, GLUCOSESI, CREATININESI, AND CREATININE
+
+```{r}
+for (i in 16:19){
+  sd_val <- sd(nyc[,i], na.rm = TRUE)
+  print(c(colnames(nyc[i]), sd_val))
+}
+```
+
+
+>- Bonus/Challenge Create a vector in which to put the standard deviations 
+
+```{r}
+sd_vec <- c()
+
+for (i in 16:19){
+  sd_val <- sd(nyc[,i], na.rm = TRUE)
+  sd_vec <- append(sd_vec, sd_val)
+}
+print(sd_vec)
+
+#In the "tips" from the lecture you said not to grow objects in a loop-- does this include append?
+```
+
+
+>- Use ifelse to create a new variable of high and normal A1C dichotomizing with 7 as a threshold for high levels
+
+```{r}
+
+nyc$highA1C <- ifelse(nyc$A1C>=7, 0, 1)
+nyc$highA1C <- factor(nyc$highA1C)
+summary(nyc$highA1C)
+```
+
