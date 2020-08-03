@@ -1,0 +1,108 @@
+---
+title: "Masters Homework 4"
+author: "Fred LaPolla"
+date: "8/3/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(RCurl)
+library(ggplot2)
+library(ComplexHeatmap)
+library(Hmisc)
+```
+
+Preparations for Final Project:
+
+Outline your analysis plan. Identify challenges you expect to encounter in analyzing your chosen data set. 
+
+## The data is all coded into groups so it has taken time to recode all the data to numbers so that it can be analyzed. Additionally, most summary statistics and initial plots haven't shown any interesting associations. 
+
+
+Pull in this data, https://raw.githubusercontent.com/fredlapolla/Summer2020R_Masters/master/elife-32032-fig2-data1_CSV.csv, which is from this paper:
+
+Piechura JR, Amarnath K, O'Shea EK. Natural changes in light interact with circadian regulation at promoters to control gene expression in cyanobacteria. Elife. 2017 Dec 14;6:e32032. doi: 10.7554/eLife.32032. PMID: 29239721; PMCID: PMC5785211.
+
+Make a heatmap of the pearson's R correlation of genes that are expressed such that the rowSums are greater than 100. 
+
+```{r}
+url <-getURL("https://raw.githubusercontent.com/fredlapolla/Summer2020R_Masters/master/elife-32032-fig2-data1_CSV.csv")
+hw4_data <- read.csv(text = url)
+head(hw4_data)
+#names(hw4_data)
+
+#Create a matrix from the 2nd to 17th column and set first column as row names
+hwdata_mat <- as.matrix(hw4_data[,2:17], "numeric")
+rownames(hwdata_mat)<- hw4_data[,1]
+#summary(hwdata_mat)
+
+##Create Low light vs. Clear light categories
+low_light <- hw4_data[,2:8]
+clear_light <- hw4_data[,9:17]
+
+#Create variable for which row sums are greater than 100
+exp_genesAll <- names(which(rowSums(hwdata_mat)>100))
+hw4Exp <- hwdata_mat[exp_genesAll,]
+
+
+Heatmap(hw4Exp, column_title = "Genes Expressed", 
+    column_title_side = "bottom", cluster_columns = FALSE, clustering_method_rows = "complete", show_row_names = FALSE)
+? Heatmap
+
+```
+
+
+>- Using GGplot, make a boxplot of A1C by diabetes diagnosis. Would you assume the three groups have the same A1C level? 
+
+```{r}
+nyc <- na.omit(nyc)
+ggplot(nyc, aes(x = (A1C), y =DX_DBTS))+geom_boxplot()+labs(x="A1C",y="Diabetes Diagnosis",title="Boxplot of A1C Level by Diabetes Diagnosis")+theme(plot.title = element_text(hjust = 0.5))
+
+#Yes, since the whiskers all overlap each other. 
+
+```
+
+
+>- Use ggplot2 to make a scatter plot of A1C by glucose levels.
+
+```{r}
+ggplot(nyc, aes(x = (A1C), y =GLUCOSE))+geom_point()+labs(x="A1C",y="Glucose Levels",title="Scatterplot of A1C Level by Glucose Levels")+theme(plot.title = element_text(hjust = 0.5))
+```
+
+
+>- Add coloration by gender for the above scatter plot and change the background theme to the minimal option. Change the X axis to label numbers by increments of 3. 
+
+```{r}
+ggplot(nyc, aes(x = (A1C), y =GLUCOSE, col=GENDER))+geom_point()+labs(x="A1C",y="Glucose Levels",title="Scatterplot of A1C Level by Glucose Levels")+theme_minimal()+ scale_x_continuous(breaks = seq(0, 15, 3))+theme(plot.title = element_text(hjust = 0.5))
+```
+
+>- Create a GGPlot chart of Lead vs. Cotinine and show two different themes for the background. 
+
+```{r}
+
+
+ggplot(nyc, aes(x = LEAD, y = COTININE)) +geom_jitter()+theme_bw()+labs(title = "Plot of Lead vs. Cotinine Levels")+theme(plot.title = element_text(hjust = 0.5))
+
+ggplot(nyc, aes(x = LEAD, y = COTININE)) +geom_jitter()+labs(title = "Plot of Lead vs. Cotinine Levels")+theme_dark()+theme(plot.title = element_text(hjust = 0.5))
+```
+
+>- Make bar charts of mean Glucose level by diabetes diagnosis. Add error bars.
+
+```{r}
+
+mean_gluc <- mean(nyc$GLUCOSE)
+sd_gluc <- sd(nyc$GLUCOSE)
+
+limits <- aes(ymax = mean_gluc + sd_gluc,
+              ymin = mean_gluc - sd_gluc)
+
+ggplot(nyc, aes(x = DX_DBTS, y = GLUCOSE)) + geom_bar(stat = 'identity', position = position_stack(reverse = TRUE))+geom_errorbar(limits, width = 0.25)+theme_minimal()
+
+```
+
+
+>- Where could you go to look up other Geom shapes for different types of charts?
+
+#### You can look up other shapes on the ggplot Cheat Sheet. 
+
